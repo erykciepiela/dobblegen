@@ -28,7 +28,7 @@ deriving instance (Show s) => Show (Deck s)
 
 -- | Dobble symbol number is each number equal to @p*p+p+1@ for sime prime @p@, examples 3, 7, 13, 31, 57, ...
 isDobbleSymbolNumber :: Int -> Bool
-isDobbleSymbolNumber n = let (Just p) = find (\p -> p * p + p + 1 >= n) (1:primes) in p * p + p + 1 == n
+isDobbleSymbolNumber n = head (dropWhile (< n) $ fmap (\p -> p * p + p + 1) (1:primes)) == n
 
 -- | For @symbols@ of size that is Bobble symbol number returns a proper Dobble deck, otherwise returns not proper Dobble deck
 -- | for  3 symbols returns deck of 3 cards with 2 symbols on a card
