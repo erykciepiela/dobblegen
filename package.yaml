@@ -41,6 +41,7 @@ executables:
     dependencies:
     - dobble
     - svg-tree
+    - directory
 
 tests:
   dobble-test:

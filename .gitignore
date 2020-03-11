@@ -1,3 +1,5 @@
 .stack-work/
 dobble.cabal
 *graphics/
+*deck/
+*symbols/
