@@ -42,6 +42,7 @@ executables:
     - dobble
     - svg-tree
     - directory
+    - containers
 
 tests:
   dobble-test:
