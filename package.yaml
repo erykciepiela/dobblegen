@@ -43,6 +43,7 @@ executables:
     - svg-tree
     - directory
     - containers
+    - JuicyPixels
 
 tests:
   dobble-test:

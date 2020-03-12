@@ -4,26 +4,31 @@ import Dobble
 import Graphics.Svg
 import System.Directory
 import Data.Map.Strict
+import Data.Monoid
+import Codec.Picture.Types
 
 placeDocument :: Double -> Double -> Double -> Double -> Double -> Double -> String -> Tree
 placeDocument w h radius spin scale angle name = UseTree (Use (Px 0, Px 0) name Nothing Nothing defaultSvg{_transform = Just [Rotate angle Nothing, Translate radius 0, Scale scale Nothing, Rotate spin Nothing, Translate (-w/2) (-h/2)]}) Nothing
 
-placeDocuments :: Double -> Double -> Double -> [Document] -> Document
-placeDocuments w h radius docs = let
-    size = length docs
+placeDocuments :: Double -> Double -> Double -> Double -> [Int] -> Tree
+placeDocuments w h radius y ids = let
+    size = length ids
     angle1 = 360 / fromIntegral size
     spin1 = 90 / fromIntegral size
+    placedDocs = zipWith (\i id -> placeDocument w h radius (fromIntegral i * spin1) 1 (fromIntegral i * angle1) (show id)) [0..] ids
+    rect = RectangleTree $ Rectangle defaultSvg{_fillColor = Last (Just FillNone), _strokeColor= Last (Just (ColorRef (PixelRGBA8 255 0 0 0))), _strokeWidth = (Last (Just (Px 2)))} (Px (- (radius + w/2)), Px (- (radius + w/2))) (Px (2 * radius + w)) (Px (2 * radius + w)) (Px 0, Px 0)
+    in GroupTree (Group defaultSvg{_transform = Just [Translate 0 (2 * (radius + w/2) * y)]} (rect:placedDocs) Nothing defaultSvg)
+
+foo :: Double -> Double -> Double -> [Document] -> Document
+foo w h radius docs = let
+    size = length docs
     symbols = (\(i, doc) -> (show i, ElementGeometry $ SymbolTree $ Symbol $ Group defaultSvg (_elements doc) Nothing defaultSvg)) <$> zip [0..] docs
-    placedDocs = (\i -> placeDocument w h radius (fromIntegral i * spin1) 1 (fromIntegral i * angle1) (show i)) <$> [0.. (size - 1)]
-    in (head docs) { _definitions = fromList symbols, _width = Just (Px 500), _height = Just (Px 500), _viewBox = Just (- (radius + w/2), - (radius + w/2), 2 * (radius + w/2), 2 * (radius + w/2)), _elements = placedDocs }
+    d = deck [0.. (size - 1)]
+    cardGroups = zipWith (\i card -> placeDocuments w h radius (fromIntegral i) (cardSymbols card)) [0..] (cards d)
+    in (head docs) { _definitions = fromList symbols, _width = Just (Px 500), _height = Just (Px (fromIntegral size * 500)), _viewBox = Just (- (radius + w/2), - (radius + w/2), 2 * (radius + w/2), fromIntegral size * 2 * (radius + w/2)), _elements = cardGroups }
 
 main :: IO ()
 main = do
     symbolFiles <- fmap (\fp -> "symbols/" <> fp) <$> listDirectory "symbols"
     symbolDocs <- traverse (\fp -> do Just doc <- loadSvgFile fp; return doc) symbolFiles
-    let d = deck (Prelude.take 13 symbolDocs)
-    let cardDocs = placeDocuments 3000 3000 3000 . cardSymbols <$> cards d
-    traverse (\(i, cardDoc) -> saveXmlFile ("deck/"<> show i <> ".svg") cardDoc) (zip [1..] cardDocs)
-    return ()
-    -- docs <- traverse (\fp -> do Just doc <- loadSvgFile fp; return doc) ((\n -> "graphics/" <> n <> ".svg") <$> ["tongue", "eye", "cheek", "foot", "knee", "nail"])
-    -- saveXmlFile "deck/output.svg" $ placeDocuments 3000 3000 3000 docs
+    saveXmlFile "deck/deck.svg" $ foo 3000 3000 3000 (Prelude.take 31 (cycle symbolDocs))
