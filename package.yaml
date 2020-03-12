@@ -44,6 +44,8 @@ executables:
     - directory
     - containers
     - JuicyPixels
+    - split
+    - rasterific-svg
 
 tests:
   dobble-test:
