@@ -43,8 +43,8 @@ foo columns rows w h docs = let
     borderStroke = Last (Just (ColorRef (PixelRGBA8 0 0 0 0)))
     caption = TextTree Nothing (Text TextAdjustSpacing defaultSvg{_spanDrawAttributes=defaultSvg{_strokeColor=borderStroke}, _spanInfo=defaultSvg{_textInfoX=[Px 0], _textInfoY=[Px 0], _textInfoDX = [Px 200], _textInfoDY = [Px 100]}, _spanContent=[SpanText ("Sheet 1")]})
     in chunksOf (columns * rows) (cards (deck [0.. (length docs - 1)])) <&> (\cards -> let
-    cardGroups = zipWith (\i card -> placeDocuments w h radius (fromIntegral (i `mod` columns)) (fromIntegral (i `div` columns)) (cardSymbols card)) [0..] cards
-    in (head docs) { _definitions = defs, _width = Just (Px (pxpercard * fromIntegral columns)), _height = Just (Px (fromIntegral rows * pxpercard)), _viewBox = Just (0, 0, fromIntegral columns * 2 * (radius + w/2), fromIntegral rows * 2 * (radius + w/2)), _elements = (caption:cardGroups) })
+        cardGroups = zipWith (\i card -> placeDocuments w h radius (fromIntegral (i `mod` columns)) (fromIntegral (i `div` columns)) (cardSymbols card)) [0..] cards
+        in Document {_documentLocation = ".", _description="sheet", _styleRules = [], _definitions = defs, _width = Just (Px (pxpercard * fromIntegral columns)), _height = Just (Px (fromIntegral rows * pxpercard)), _viewBox = Just (0, 0, fromIntegral columns * 2 * (radius + w/2), fromIntegral rows * 2 * (radius + w/2)), _elements = caption:cardGroups })
 
 main :: IO ()
 main = do
