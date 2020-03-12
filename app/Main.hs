@@ -9,11 +9,8 @@ import Codec.Picture.Types
 import Data.List.Split
 import Data.Foldable
 import Data.Functor
-import Codec.Picture( writePng )
-import Graphics.Svg( loadSvgFile )
-import Graphics.Rasterific.Svg( loadCreateFontCache
-                              , renderSvgDocument
-                              )
+import Codec.Picture(writePng)
+import Graphics.Rasterific.Svg(loadCreateFontCache, renderSvgDocument)
 
 sheetDocs :: Int -> Int -> Double -> Double -> Double -> [Document] -> [Document]
 sheetDocs columns rows pxpercard w h symbolDocs = let
