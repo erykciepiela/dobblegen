@@ -40,7 +40,7 @@ main :: IO ()
 main = do
     symbolFiles <- fmap ("symbols/" <>) <$> listDirectory "symbols"
     symbolDocs <- traverse (\fp -> do Just doc <- loadSvgFile fp; return doc) symbolFiles
-    traverse_ (\(i, doc) -> renderPng ("deck/sheet" <> show i <> ".png") doc) (zip [1..] (sheetDocs 3 4 1000 3000 3000 (Prelude.take 31 symbolDocs)))
+    traverse_ (\(i, doc) -> renderPng ("deck/sheet" <> show i <> ".png") doc) (zip [1..] (sheetDocs 2 2 1000 3000 3000 (Prelude.take 31 symbolDocs)))
         where
             renderPng :: FilePath -> Document -> IO ()
             renderPng pngfilename doc = do
