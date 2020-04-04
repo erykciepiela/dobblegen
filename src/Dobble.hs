@@ -37,7 +37,7 @@ isDobbleSymbolNumber n = head (dropWhile (< n) $ fmap (\p -> p * p + p + 1) (1:p
 -- | for 31 symbols returns deck of 31 cards with 6 symbols on a card
 -- | for 57 symbols returns deck of 57 cards with 8 symbols on a card
 deck :: [s] -> Deck s
-deck symbols = let (Just prime) = find (\p -> p * p + p + 1 >= length symbols) (1:primes) in Deck $ Card . fmap (symbols !!) . filter (length symbols >) <$> projectivePlane prime
+deck symbols = let (Just prime) = find (\p -> p * p + p + 1 >= length symbols) (1:primes) in Deck $ Card . fmap (symbols !!) <$> projectivePlane prime
 
 -- | For prime number @p@ returns @p2+p+1@ lines of @p2+p+1@ points, with @p+1@ points on each line
 -- | E.g. 
