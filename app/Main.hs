@@ -51,12 +51,12 @@ sheetDocs columns rows pxpercard w h flipDoc symbolDocs = let
 
 main :: IO ()
 main = do
-    symbolFiles <- fmap ("symbols/" <>) <$> listDirectory "symbols"
-    symbolDocs <- traverse (\fp -> do Just doc <- loadSvgFile fp; return doc) symbolFiles
+    symbolDocs <- fmap ("symbols/" <>) <$> listDirectory "symbols" >>= traverse (\fp -> do Just doc <- loadSvgFile fp; return doc)
     Just flipDoc <- loadSvgFile "flip/flip.svg"
     let docs = sheetDocs 2 2 1000 3000 3000 flipDoc symbolDocs
-    traverse_ (\(i, (doc, _)) -> renderPng ("deck/sheet" <> show i <> "a.png") doc) (zip [1..] docs)
-    traverse_ (\(i, (_, doc)) -> renderPng ("deck/sheet" <> show i <> "b.png") doc) (zip [1..] docs)
+    traverse_ (\(i, (front, back)) -> do
+        renderPng ("deck/sheet" <> show i <> "b.png") front
+        renderPng ("deck/sheet" <> show i <> "a.png") back) (zip [1..] docs)
         where
             renderPng :: FilePath -> Document -> IO ()
             renderPng pngfilename doc = do
