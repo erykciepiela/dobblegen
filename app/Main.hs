@@ -38,13 +38,13 @@ sheetDocs columns rows pxpercard w h flipDoc symbolDocs = let
                     angle1 = 360 / fromIntegral size
                     spin1 = 90 / fromIntegral size
                     placedDocs = zipWith (\i id -> symbolTree w h radius (fromIntegral i * spin1 + 10) 1 (fromIntegral i * angle1 + 20) (show id)) [0..] ids
-                    borderStroke = Last (Just (ColorRef (PixelRGBA8 100 100 100 100)))
+                    borderStroke = Last (Just (ColorRef (PixelRGBA8 100 100 100 255)))
+                    cutStroke = Last (Just (ColorRef (PixelRGBA8 200 200 200 255)))
                     cardWidth = 3 * radius
-                    cutRect = RectangleTree $ Rectangle defaultSvg{_fillColor = Last (Just FillNone), _strokeColor= borderStroke, _strokeWidth = Last (Just (Px 10))} (Px (- (cardWidth/2)), Px (- (cardWidth/2))) (Px cardWidth) (Px cardWidth) (Px 0, Px 0)
-                    -- style="fill:none;stroke:#000000;stroke-width:13.22916698;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" ry="36.285713"
-                    border = RectangleTree $ Rectangle defaultSvg{_strokeLineCap=Last (Just CapRound), _fillColor = Last (Just FillNone), _strokeColor= borderStroke, _strokeWidth = Last (Just (Px 1000))} (Px (- (cardWidth/2)), Px (- (cardWidth/2))) (Px cardWidth) (Px cardWidth) (Px 1000, Px 1000)
-                    foo = UseTree (Use (Px 0, Px 0) "0" Nothing Nothing defaultSvg{_transform = Just [Scale 1 Nothing, Rotate 30 Nothing, Translate (-w/2) (-h/2)]}) Nothing
-                    in (placedDocs, [cutRect, border, foo])
+                    cutRect = RectangleTree $ Rectangle defaultSvg{_fillColor = Last (Just FillNone), _strokeDashArray=Last (Just [Px 400]), _strokeColor=cutStroke, _strokeWidth = Last (Just (Px 10))} (Px (- (cardWidth/2)), Px (- (cardWidth/2))) (Px cardWidth) (Px cardWidth) (Px 0, Px 0)
+                    border = RectangleTree $ Rectangle defaultSvg{_strokeLineCap=Last (Just CapRound), _fillColor = Last (Just FillNone), _strokeOpacity=Just 1, _strokeColor= borderStroke, _strokeWidth = Last (Just (Px 1000))} (Px (- (cardWidth/2)), Px (- (cardWidth/2))) (Px cardWidth) (Px cardWidth) (Px 1000, Px 1000)
+                    foo = UseTree (Use (Px 0, Px 0) "0" Nothing Nothing defaultSvg{_transform = Just [Scale 3 Nothing, Rotate 30 Nothing, Translate (-w/2) (-h/2)]}) Nothing
+                    in (placedDocs, [border, foo, cutRect])
                         where
                             symbolTree :: Double -> Double -> Double -> Double -> Double -> Double -> String -> Tree
                             symbolTree w h radius spin scale angle name = UseTree (Use (Px 0, Px 0) name Nothing Nothing defaultSvg{_transform = Just [Rotate angle Nothing, Translate radius 0, Scale scale Nothing, Rotate spin Nothing, Translate (-w/2) (-h/2)]}) Nothing
