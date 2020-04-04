@@ -55,8 +55,8 @@ main = do
     Just flipDoc <- loadSvgFile "flip/flip.svg"
     let docs = sheetDocs 2 2 1000 3000 3000 flipDoc symbolDocs
     traverse_ (\(i, (front, back)) -> do
-        renderPng ("deck/sheet" <> show i <> "b.png") front
-        renderPng ("deck/sheet" <> show i <> "a.png") back) (zip [1..] docs)
+        renderPng ("deck/" <> show (2 * i - 1) <> ".png") front
+        renderPng ("deck/" <> show (2 * i) <> ".png") back) (zip [1..] docs)
         where
             renderPng :: FilePath -> Document -> IO ()
             renderPng pngfilename doc = do
