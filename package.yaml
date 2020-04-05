@@ -27,6 +27,8 @@ dependencies:
 default-extensions:
 - StandaloneDeriving
 - OverloadedStrings
+- MultiParamTypeClasses
+- FlexibleInstances
 
 library:
   source-dirs: src
