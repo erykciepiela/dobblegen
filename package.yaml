@@ -29,6 +29,7 @@ default-extensions:
 - OverloadedStrings
 - MultiParamTypeClasses
 - FlexibleInstances
+- FunctionalDependencies
 
 library:
   source-dirs: src

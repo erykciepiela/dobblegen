@@ -12,7 +12,7 @@ import Data.Functor
 import Codec.Picture(writePng)
 import Graphics.Rasterific.Svg(loadCreateFontCache, renderSvgDocument)
 
-class DeckRenderer r s v where
+class DeckRenderer r s v | r -> s v where
     renderDeck :: r -> Deck s -> v
 
 -- Puts SVG documents of symbols onto SVG documents of pages of cards to print
