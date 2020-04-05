@@ -1,23 +1,17 @@
 module Dobble (
-    Deck,
+    Deck(..),
     deck,
     isDobbleSymbolNumber,
-    projectivePlane,
-    cards,
-    Card,
-    cardSymbols,
+    -- projectivePlane,
 ) where
 
 import Data.Numbers.Primes
 import Data.List
 import Data.Set
 
-newtype Card s = Card {
-    cardSymbols :: [s]
-}
-
-newtype Deck s = Deck {
-    cards :: [Card s]
+data Deck s = Deck {
+    deckSymbols :: [s],
+    deckCards :: [[Int]]
 }
 
 -- | Dobble symbol number is each number equal to @p*p+p+1@ for sime prime @p@, examples 3, 7, 13, 31, 57, ...
@@ -31,7 +25,7 @@ isDobbleSymbolNumber n = head (dropWhile (< n) $ fmap (\p -> p * p + p + 1) (1:p
 -- | for 31 symbols returns deck of 31 cards with 6 symbols on a card
 -- | for 57 symbols returns deck of 57 cards with 8 symbols on a card
 deck :: [s] -> Deck s
-deck symbols = let (Just prime) = find (\p -> p * p + p + 1 >= length symbols) (1:primes) in Deck $ Card . fmap (symbols !!) . toList <$> toList (projectivePlane prime)
+deck symbols = let (Just prime) = find (\p -> p * p + p + 1 >= length symbols) (1:primes) in Deck symbols (toList <$> toList (projectivePlane prime))
 
 -- | For prime number @p@ returns @p2+p+1@ lines of @p2+p+1@ points, with @p+1@ points on each line
 -- | E.g. 

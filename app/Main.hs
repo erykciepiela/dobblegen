@@ -12,25 +12,25 @@ import Data.Functor
 import Codec.Picture(writePng)
 import Graphics.Rasterific.Svg(loadCreateFontCache, renderSvgDocument)
 
-sheetDocs :: Int -> Int -> Double -> Double -> Double -> Document -> [Document] -> [(Document, Document)]
-sheetDocs columns rows pxpercard w h flipDoc symbolDocs = let
+sheetDocs :: Int -> Int -> Double -> Double -> Double -> Document -> Deck Document -> [Document]
+sheetDocs columns rows pxpercard w h flipDoc (Deck symbolDocs d) = let
     radius = sqrt (w ^ 2 + h ^ 2)
     face1Defs = fromList $ (\(i, doc) -> (show i, ElementGeometry $ SymbolTree $ Symbol $ Group defaultSvg (_elements doc) Nothing defaultSvg)) <$> zip [0..] symbolDocs
     face2Defs = singleton "0" $ ElementGeometry $ SymbolTree $ Symbol $ Group defaultSvg (_elements flipDoc) Nothing defaultSvg
     borderStroke = Last (Just (ColorRef (PixelRGBA8 0 0 0 0)))
     cardWidth = 3 * radius
     caption = TextTree Nothing (Text TextAdjustSpacing defaultSvg{_spanDrawAttributes=defaultSvg{_strokeColor=borderStroke}, _spanInfo=defaultSvg{_textInfoX=[Px 0], _textInfoY=[Px 0], _textInfoDX = [Px 200], _textInfoDY = [Px 100]}, _spanContent=[SpanText ("Sheet 1")]})
-    in chunksOf (columns * rows) (cards (deck [0.. (length symbolDocs - 1)])) <&> (\cards -> let
+    in mconcat $ chunksOf (columns * rows) d <&> (\cards -> let
         cardGroups = zipWith (\i card -> let
             x = fromIntegral (i `mod` columns)
             y = fromIntegral (i `div` columns)
-            (f1, f2) = cardTree w h radius  (cardSymbols card)
+            (f1, f2) = cardTree w h radius card
             face1Tree = GroupTree (Group defaultSvg{_transform = Just [Translate (cardWidth * x + (cardWidth/2)) (cardWidth * y + (cardWidth/2))]} f1 Nothing defaultSvg)
             face2Tree = GroupTree (Group defaultSvg{_transform = Just [Translate (cardWidth * (fromIntegral columns - 1 - x) + (cardWidth/2)) (cardWidth * y + (cardWidth/2))]} f2 Nothing defaultSvg)
             in (face1Tree, face2Tree)) [0..] cards
         face1 = Document {_documentLocation = ".", _description="", _styleRules = [], _definitions = face1Defs, _width = Just (Px (pxpercard * fromIntegral columns)), _height = Just (Px (fromIntegral rows * pxpercard)), _viewBox = Just (0, 0, fromIntegral columns * cardWidth, fromIntegral rows * cardWidth), _elements = fst <$> cardGroups }
         face2 = Document {_documentLocation = ".", _description="", _styleRules = [], _definitions = face2Defs, _width = Just (Px (pxpercard * fromIntegral columns)), _height = Just (Px (fromIntegral rows * pxpercard)), _viewBox = Just (0, 0, fromIntegral columns * cardWidth, fromIntegral rows * cardWidth), _elements = snd <$> cardGroups }
-        in (face1, face2))
+        in [face1, face2])
             where
                 cardTree :: Double -> Double -> Double -> [Int] -> ([Tree], [Tree])
                 cardTree w h radius ids = let
@@ -53,10 +53,8 @@ main :: IO ()
 main = do
     symbolDocs <- fmap ("symbols/" <>) <$> listDirectory "symbols" >>= traverse (\fp -> do Just doc <- loadSvgFile fp; return doc)
     Just flipDoc <- loadSvgFile "flip/flip.svg"
-    let docs = sheetDocs 2 2 1000 3000 3000 flipDoc symbolDocs
-    traverse_ (\(i, (front, back)) -> do
-        renderPng ("deck/" <> show (2 * i - 1) <> ".png") front
-        renderPng ("deck/" <> show (2 * i) <> ".png") back) (zip [1..] docs)
+    let docs = sheetDocs 2 2 1000 3000 3000 flipDoc (deck symbolDocs)
+    traverse_ (\(i, doc) -> renderPng ("deck/" <> show i <> ".png") doc) (zip [1..] docs)
         where
             renderPng :: FilePath -> Document -> IO ()
             renderPng pngfilename doc = do
