@@ -1,7 +1,8 @@
 module Dobble (
     Deck(..),
-    deck,
+    DeckRenderer(..),
     isDobbleSymbolNumber,
+    foo,
     -- projectivePlane,
 ) where
 
@@ -38,3 +39,10 @@ projectivePlane :: Int -> Set (Set Int)
 projectivePlane p = fromList $ [fromList ([((i * k + j) `mod` p) * p + k | k <- [0..(p - 1)]] <> [p * p + i]) | i <- [0..(p - 1)], j <- [0..(p - 1)]]
     <> [fromList ([j * p + i | j <- [0..(p - 1)]] <> [p * p + p]) | i <- [0..(p - 1)]] 
     <> [fromList [p * p + i | i <- [0..p]]]
+
+
+class DeckRenderer r s v where 
+    renderDeck :: r -> Deck s -> v
+
+foo :: DeckRenderer r s v => r -> [s] -> v
+foo r symbols = renderDeck r (deck symbols)
