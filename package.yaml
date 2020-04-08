@@ -30,6 +30,15 @@ dependencies:
 - split
 - rasterific-svg
 - lucid
+- wai -any
+- wai-extra -any
+- warp -any
+- http-media -any
+- servant -any
+- servant-server -any
+- servant-lucid
+- servant-multipart -any
+- bytestring
 
 
 default-extensions:
@@ -38,6 +47,10 @@ default-extensions:
 - MultiParamTypeClasses
 - FlexibleInstances
 - FunctionalDependencies
+- ExtendedDefaultRules
+- DataKinds
+- TypeOperators
+- GADTs
 
 library:
   source-dirs: src
