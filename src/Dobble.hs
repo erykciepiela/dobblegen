@@ -2,7 +2,7 @@ module Dobble (
     Deck(..),
     DeckRenderer(..),
     isDobbleSymbolNumber,
-    foo,
+    generateDeck,
     -- projectivePlane,
 ) where
 
@@ -44,5 +44,5 @@ projectivePlane p = fromList $ [fromList ([((i * k + j) `mod` p) * p + k | k <- 
 class DeckRenderer r s v where 
     renderDeck :: r -> Deck s -> v
 
-foo :: DeckRenderer r s v => r -> [s] -> v
-foo r symbols = renderDeck r (deck symbols)
+generateDeck :: DeckRenderer r s v => r -> [s] -> v
+generateDeck r symbols = renderDeck r (deck symbols)

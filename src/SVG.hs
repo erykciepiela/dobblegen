@@ -55,21 +55,24 @@ instance DeckRenderer SVGDeckRenderer Document [Document] where
                         cardWidth = 3 * radius
                         cutRect = RectangleTree $ Rectangle defaultSvg{_fillColor = Last (Just FillNone), _strokeDashArray=Last (Just [Px 400]), _strokeColor=cutStroke, _strokeWidth = Last (Just (Px 10))} (Px (- (cardWidth/2)), Px (- (cardWidth/2))) (Px cardWidth) (Px cardWidth) (Px 0, Px 0)
                         border = RectangleTree $ Rectangle defaultSvg{_strokeLineCap=Last (Just CapRound), _fillColor = Last (Just FillNone), _strokeOpacity=Just 1, _strokeColor= borderStroke, _strokeWidth = Last (Just (Px 1000))} (Px (- (cardWidth/2)), Px (- (cardWidth/2))) (Px cardWidth) (Px cardWidth) (Px 1000, Px 1000)
-                        foo = UseTree (Use (Px 0, Px 0) "0" Nothing Nothing defaultSvg{_transform = Just [Scale 3 Nothing, Rotate 30 Nothing, Translate (-w/2) (-h/2)]}) Nothing
-                        in (placedDocs, [border, foo, cutRect])
+                        logo = UseTree (Use (Px 0, Px 0) "0" Nothing Nothing defaultSvg{_transform = Just [Scale 6 Nothing, Rotate 30 Nothing, Translate (-w/2) (-h/2)]}) Nothing
+                        in (placedDocs, [border, logo, cutRect])
                             where
                             symbolTree :: Double -> Double -> Double -> Double -> Double -> Double -> String -> Tree
                             symbolTree w h radius spin scale angle name = UseTree (Use (Px 0, Px 0) name Nothing Nothing defaultSvg{_transform = Just [Rotate angle Nothing, Translate radius 0, Scale scale Nothing, Rotate spin Nothing, Translate (-w/2) (-h/2)]}) Nothing
-
-renderPng :: FilePath -> Document -> IO ()
-renderPng pngfilename doc = do
-    cache <- loadCreateFontCache "fonty-texture-cache"
-    (finalImage, _) <- renderSvgDocument cache Nothing 300 doc
-    writePng pngfilename finalImage
 
 run :: IO ()
 run = do
     symbolSVGs <- fmap ("symbols/" <>) <$> listDirectory "symbols" >>= traverse (\fp -> do Just doc <- loadSvgFile fp; return doc)
     Just flipSideSVG <- loadSvgFile "flip/flip.svg"
-    let pagesSVGs = foo (SVGDeckRenderer 2 2 1000 3000 3000 flipSideSVG) symbolSVGs
-    traverse_ (\(i, pageSVG) -> renderPng ("deck/" <> show i <> ".png") pageSVG) (zip [1..] pagesSVGs)
+    traverse_ (\(i, pageSVG) -> renderPng ("deck/" <> show i <> ".png") pageSVG) (zip [1..] (generateSVGDeck symbolSVGs flipSideSVG))
+        where
+            renderPng :: FilePath -> Document -> IO ()
+            renderPng pngfilename doc = do
+                cache <- loadCreateFontCache "fonty-texture-cache"
+                (finalImage, _) <- renderSvgDocument cache Nothing 300 doc
+                writePng pngfilename finalImage
+
+generateSVGDeck :: [Document] -> Document -> [Document]
+generateSVGDeck symbolSVGs flipSideSVG = generateDeck (SVGDeckRenderer 2 2 1000 3000 3000 flipSideSVG) symbolSVGs
+
