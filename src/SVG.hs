@@ -9,8 +9,10 @@ import Codec.Picture.Types
 import Data.List.Split
 import Data.Foldable
 import Data.Functor
-import Codec.Picture(writePng)
+import Codec.Picture(writePng, encodePng)
 import Graphics.Rasterific.Svg(loadCreateFontCache, renderSvgDocument)
+import qualified Data.ByteString as BS
+import qualified Data.ByteString.Lazy as LBS
 
 -- Puts SVG documents of symbols onto SVG documents of pages of cards to print
 data SVGDeckRenderer = SVGDeckRenderer {
@@ -61,8 +63,8 @@ instance DeckRenderer SVGDeckRenderer Document [Document] where
                             symbolTree :: Double -> Double -> Double -> Double -> Double -> Double -> String -> Tree
                             symbolTree w h radius spin scale angle name = UseTree (Use (Px 0, Px 0) name Nothing Nothing defaultSvg{_transform = Just [Rotate angle Nothing, Translate radius 0, Scale scale Nothing, Rotate spin Nothing, Translate (-w/2) (-h/2)]}) Nothing
 
-run :: IO ()
-run = do
+runCLI :: IO ()
+runCLI = do
     symbolSVGs <- fmap ("symbols/" <>) <$> listDirectory "symbols" >>= traverse (\fp -> do Just doc <- loadSvgFile fp; return doc)
     Just flipSideSVG <- loadSvgFile "flip/flip.svg"
     traverse_ (\(i, pageSVG) -> renderPng ("deck/" <> show i <> ".png") pageSVG) (zip [1..] (generateSVGDeck symbolSVGs flipSideSVG))
@@ -75,4 +77,13 @@ run = do
 
 generateSVGDeck :: [Document] -> Document -> [Document]
 generateSVGDeck symbolSVGs flipSideSVG = generateDeck (SVGDeckRenderer 2 2 1000 3000 3000 flipSideSVG) symbolSVGs
+
+generateSVGDeck' :: [BS.ByteString] -> BS.ByteString -> IO [BS.ByteString]
+generateSVGDeck' symbolBSs flipSideBS = do
+    let symbolSVGs = sequenceA (parseSvgFile "" <$> symbolBSs)
+    let flipSideSVG = parseSvgFile "" flipSideBS
+    let (Just docs) = generateSVGDeck <$> symbolSVGs <*> flipSideSVG
+    cache <- loadCreateFontCache "fonty-texture-cache"
+    fmap (LBS.toStrict . encodePng . fst) <$> traverse (renderSvgDocument cache Nothing 300) docs
+
 
