@@ -13,10 +13,12 @@ import Control.Monad.IO.Class
 import Control.Monad
 import Data.Foldable
 import SVG (generateSVGDeck')
+import Data.String
+import Codec.Archive.Zip
 
 
 type PurgeAPI = Get '[HTML] (Html ())
-    :<|> "form" :> MultipartForm Mem (MultipartData Mem) :> Post '[JSON] Int
+    :<|> "form" :> MultipartForm Mem (MultipartData Mem) :> Post '[OctetStream] (LBS.ByteString)
 
 runWebApp :: IO ()
 runWebApp = run 8081 $ serveWithContext (Proxy :: Proxy PurgeAPI) ((defaultMultipartOptions (Proxy :: Proxy Mem)) {generalOptions = setMaxRequestNumFiles 32 defaultParseRequestBodyOptions} :. EmptyContext) $ return mainHTML
@@ -35,11 +37,16 @@ runWebApp = run 8081 $ serveWithContext (Proxy :: Proxy PurgeAPI) ((defaultMulti
                     p_ "and press the button..."
                     input_ [type_ "submit", value_ "Create Deck!"]
 
-        generateDeck :: MonadIO m => MultipartData Mem -> m Int
+        generateDeck :: MonadIO m => MultipartData Mem -> m LBS.ByteString
         generateDeck multipartData = liftIO $ do
             let symbolSvgBSs = LBS.toStrict . fdPayload <$> filter ((== "symbolSvgFiles") . fdInputName) (files multipartData)
             let (Just flipSideSvgBS) = LBS.toStrict . fdPayload <$> find ((== "flipSideSvgFile") . fdInputName) (files multipartData)
             pages <- generateSVGDeck' symbolSvgBSs flipSideSvgBS
-            forM_ pages $ \page ->
-                print $ BS.length page 
-            return $ sum $ BS.length <$> pages
+            let archive = foldr (\(i, page) a -> addEntryToArchive (toEntry (show i <> ".png") 0 (LBS.fromStrict page)) a) emptyArchive (zip [1..] pages)
+            let bs = fromArchive archive
+            return bs
+            -- return $ html_ $ do
+            --     title_ "Dobble Generator"
+            --     body_ $ do
+            --         h1_ "Dobble Generator"
+            --         p_ (fromString (show (sum $ BS.length <$> pages)))

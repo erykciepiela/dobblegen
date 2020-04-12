@@ -39,6 +39,7 @@ dependencies:
 - servant-lucid
 - servant-multipart -any
 - bytestring
+- zip-archive
 
 
 default-extensions:
