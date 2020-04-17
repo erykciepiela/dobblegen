@@ -4,7 +4,7 @@ import SVG
 import Web
 
 main :: IO ()
--- main = SVG.run
-main = runWebApp
+main = SVG.runCLI
+-- main = runWebApp
 -- main = webapp
 

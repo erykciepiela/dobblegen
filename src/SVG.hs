@@ -55,10 +55,16 @@ instance DeckRenderer SVGDeckRenderer Document [Document] where
                         borderStroke = Last (Just (ColorRef (PixelRGBA8 100 100 100 255)))
                         cutStroke = Last (Just (ColorRef (PixelRGBA8 200 200 200 255)))
                         cardWidth = 3 * radius
-                        cutRect = RectangleTree $ Rectangle defaultSvg{_fillColor = Last (Just FillNone), _strokeDashArray=Last (Just [Px 400]), _strokeColor=cutStroke, _strokeWidth = Last (Just (Px 10))} (Px (- (cardWidth/2)), Px (- (cardWidth/2))) (Px cardWidth) (Px cardWidth) (Px 0, Px 0)
-                        border = RectangleTree $ Rectangle defaultSvg{_strokeLineCap=Last (Just CapRound), _fillColor = Last (Just FillNone), _strokeOpacity=Just 1, _strokeColor= borderStroke, _strokeWidth = Last (Just (Px 1000))} (Px (- (cardWidth/2)), Px (- (cardWidth/2))) (Px cardWidth) (Px cardWidth) (Px 1000, Px 1000)
-                        logo = UseTree (Use (Px 0, Px 0) "0" Nothing Nothing defaultSvg{_transform = Just [Scale 6 Nothing, Rotate 30 Nothing, Translate (-w/2) (-h/2)]}) Nothing
-                        in (placedDocs, [border, logo, cutRect])
+                        -- cutRect = RectangleTree $ Rectangle defaultSvg{_fillColor = Last (Just FillNone), _strokeDashArray=Last (Just [Px 400]), _strokeColor=cutStroke, _strokeWidth = Last (Just (Px 10))} (Px (- (cardWidth/2)), Px (- (cardWidth/2))) (Px cardWidth) (Px cardWidth) (Px 0, Px 0)
+    --                     <path
+    --  style="fill:none;stroke:#15a700;stroke-width:0.60594976;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:1.81784922, 0.60594974;stroke-dashoffset:6.05949736;stroke-opacity:1"
+    --  d="M 1800,1277.5 1284.16,1792.8479 555.00001,1792.5 39.652066,1276.66 40.000005,547.50001 555.84001,32.152066 1285,32.500005 1800.3479,548.34001 Z"
+    --  d="M V2 1800 1277.5 1284.16,1792.8479 555.00001,1792.5 39.652066,1276.66 40.000005,547.50001 555.84001,32.152066 1285,32.500005 1800.3479,548.34001 Z"
+    --  transform="matrix(1.7032849,0,0,1.703295,-67.022713,-54.264978)" />
+                        -- cutRect = PathTree $ Path defaultSvg{_fillColor = Last (Just FillNone), _strokeDashArray=Last (Just [Px 400]), _strokeColor=cutStroke, _strokeWidth = Last (Just (Px 10))} [PathCommand]
+                        -- border = RectangleTree $ Rectangle defaultSvg{_strokeLineCap=Last (Just CapRound), _fillColor = Last (Just FillNone), _strokeOpacity=Just 1, _strokeColor= borderStroke, _strokeWidth = Last (Just (Px 1000))} (Px (- (cardWidth/2)), Px (- (cardWidth/2))) (Px cardWidth) (Px cardWidth) (Px 1000, Px 1000)
+                        logo = UseTree (Use (Px 0, Px 0) "0" Nothing Nothing defaultSvg{_transform = Just [Scale 4.25 Nothing, Rotate 0 Nothing, Translate (-w/2) (-h/2)]}) Nothing
+                        in (placedDocs, [logo])
                             where
                             symbolTree :: Double -> Double -> Double -> Double -> Double -> Double -> String -> Tree
                             symbolTree w h radius spin scale angle name = UseTree (Use (Px 0, Px 0) name Nothing Nothing defaultSvg{_transform = Just [Rotate angle Nothing, Translate radius 0, Scale scale Nothing, Rotate spin Nothing, Translate (-w/2) (-h/2)]}) Nothing
